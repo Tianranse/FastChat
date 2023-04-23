@@ -40,11 +40,14 @@ class Conversation:
     # Used for gradio server
     skip_next: bool = False
     conv_id: Any = None
+    role_setting: str = ""
 
     def get_prompt(self):
         if self.sep_style == SeparatorStyle.SINGLE:
             ret = self.system
-            for role, message in self.messages:
+            if self.role_setting:
+                ret += " " + self.role_setting
+            for role, message in self.messages[self.offset:]:
                 if message:
                     ret += self.sep + " " + role + ": " + message
                 else:
@@ -52,8 +55,8 @@ class Conversation:
             return ret
         elif self.sep_style == SeparatorStyle.TWO:
             seps = [self.sep, self.sep2]
-            ret = self.system + seps[0]
-            for i, (role, message) in enumerate(self.messages):
+            ret = self.system + " " + self.role_setting + seps[0]
+            for i, (role, message) in enumerate(self.messages[self.offset:]):
                 if message:
                     ret += role + ": " + message + seps[i % 2]
                 else:
@@ -62,7 +65,9 @@ class Conversation:
         elif self.sep_style == SeparatorStyle.DOLLY:
             seps = [self.sep, self.sep2]
             ret = self.system
-            for i, (role, message) in enumerate(self.messages):
+            if self.role_setting:
+                ret += " " + self.role_setting
+            for i, (role, message) in enumerate(self.messages[self.offset:]):
                 if message:
                     ret += role + ":\n" + message + seps[i % 2]
                     if i % 2 == 1:
@@ -72,7 +77,7 @@ class Conversation:
             return ret
         elif self.sep_style == SeparatorStyle.OASST_PYTHIA:
             ret = self.system
-            for role, message in self.messages:
+            for role, message in self.messages[self.offset:]:
                 if message:
                     ret += role + message + self.sep
                 else:
@@ -86,7 +91,8 @@ class Conversation:
 
     def to_gradio_chatbot(self):
         ret = []
-        for i, (role, msg) in enumerate(self.messages[self.offset :]):
+        # for i, (role, msg) in enumerate(self.messages[self.offset:]):
+        for i, (role, msg) in enumerate(self.messages):
             if i % 2 == 0:
                 ret.append([msg, None])
             else:
@@ -103,6 +109,7 @@ class Conversation:
             sep=self.sep,
             sep2=self.sep2,
             conv_id=self.conv_id,
+            role_setting=self.role_setting
         )
 
     def dict(self):
@@ -114,6 +121,7 @@ class Conversation:
             "sep": self.sep,
             "sep2": self.sep2,
             "conv_id": self.conv_id,
+            "role_setting": self.role_setting
         }
 
 
@@ -157,6 +165,7 @@ conv_one_shot = Conversation(
 conv_vicuna_v1_1 = Conversation(
     system="A chat between a curious user and an artificial intelligence assistant. "
     "The assistant gives helpful, detailed, and polite answers to the user's questions.",
+    role_setting="",
     roles=("USER", "ASSISTANT"),
     messages=(),
     offset=0,

@@ -91,8 +91,6 @@ def main(args):
         use_fast=False,
     )
 
-
-
     new_content = split_contents(
         content, args.begin, args.end, tokenizer, args.max_length, conv_vicuna_v1_1.system
     )

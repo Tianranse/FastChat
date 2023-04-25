@@ -14,7 +14,7 @@ import transformers
 import tqdm
 
 from fastchat import conversation as conversation_lib
-
+from fastchat.conversation import conv_vicuna_v1_1
 
 def split_sample(sample, start_idx, end_idx):
     assert (end_idx - start_idx) % 2 == 0
@@ -24,10 +24,15 @@ def split_sample(sample, start_idx, end_idx):
     }
 
 
-def split_contents(content, begin, end, tokenizer, max_length):
+def split_contents(content, begin, end, tokenizer, max_length, prefix=""):
     """
     Keep the maximum round of conversations within the max token length constraint
     """
+    if len(prefix):
+        prefix_tokenized_len = 0
+    else:
+        prefix_tokenized_len = len(tokenizer(prefix).input_ids) + 2
+
     content = content[begin:end]
     new_content = []
 
@@ -40,15 +45,16 @@ def split_contents(content, begin, end, tokenizer, max_length):
             tokenized_lens.append(length)
 
         start_idx = 0
-        cur_len = 0
+        cur_len = prefix_tokenized_len
         sample
         assert len(conversations) % 2 == 0, f"id: {sample['id']}"
         for i in range(0, len(conversations), 2):
             tmp_len = tokenized_lens[i] + tokenized_lens[i + 1]
             if cur_len + tmp_len > max_length:
                 new_content.append(split_sample(sample, start_idx, i))
-                start_idx = i
-                cur_len = 0
+                # skip long content
+                start_idx = (i+2) if prefix_tokenized_len + tmp_len > max_length else i
+                cur_len = prefix_tokenized_len
             elif i == len(conversations) - 2:
                 new_content.append(split_sample(sample, start_idx, i + 2))
 
@@ -84,8 +90,11 @@ def main(args):
         padding_side="right",
         use_fast=False,
     )
+
+
+
     new_content = split_contents(
-        content, args.begin, args.end, tokenizer, args.max_length
+        content, args.begin, args.end, tokenizer, args.max_length, conv_vicuna_v1_1.system
     )
     new_content = filter_invalid_roles(new_content)
 

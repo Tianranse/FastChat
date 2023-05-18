@@ -34,6 +34,7 @@ enable_btn = gr.Button.update(interactive=True)
 disable_btn = gr.Button.update(interactive=False)
 controller_url = None
 enable_moderation = False
+conv_template = "vicuna"
 models = []
 
 model_path = "/data1/llm/model_checkpoint/vicuna-13b-full-v1.1"
@@ -49,11 +50,12 @@ priority = {
 }
 
 
-def set_global_vars(controller_url_, enable_moderation_, models_):
-    global controller_url, enable_moderation, models
+def set_global_vars(controller_url_, enable_moderation_, models_, conv_template_):
+    global controller_url, enable_moderation, models, conv_template
     controller_url = controller_url_
     enable_moderation = enable_moderation_
     models = models_
+    conv_template = conv_template_
 
 
 def get_conv_log_filename():
@@ -171,7 +173,7 @@ def add_text(state, text, request: gr.Request):
     logger.info(f"add_text. ip: {request.client.host}. len: {len(text)}")
 
     if state is None:
-        state = get_default_conv_template("vicuna").copy()
+        state = get_default_conv_template(conv_template).copy()
 
     if len(text) <= 0:
         state.skip_next = True
@@ -198,7 +200,7 @@ def update_role_setting(state, role_setting, request: gr.Request):
 
     if state is None:
         logger.info(f"init state in update_role_setting.")
-        state = get_default_conv_template("vicuna").copy()
+        state = get_default_conv_template(conv_template).copy()
     state.role_setting = role_setting
     logger.info(f"update role setting: {state.get_prompt()}")
     return (state,) + (disable_btn,) * 5
@@ -208,7 +210,7 @@ def update_system_prompt(state, system_setting, request: gr.Request):
 
     if state is None:
         logger.info(f"init state in update_system_prompt.")
-        state = get_default_conv_template("vicuna").copy()
+        state = get_default_conv_template(conv_template).copy()
     state.system = system_setting
     logger.info(f"update system prompt: {state.get_prompt()}")
     return (state,) + (disable_btn,) * 5
@@ -238,7 +240,8 @@ def http_bot(state, model_selector, temperature, max_new_tokens, request: gr.Req
 
     if len(state.messages) == state.offset + 2:
         # First round of conversation
-        new_state = get_default_conv_template(model_name).copy()
+        # new_state = get_default_conv_template(model_name).copy()
+        new_state = get_default_conv_template(conv_template).copy()
         new_state.conv_id = uuid.uuid4().hex
         new_state.append_message(new_state.roles[0], state.messages[-2][1])
         new_state.append_message(new_state.roles[1], None)
@@ -574,11 +577,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--moderate", action="store_true", help="Enable content moderation"
     )
+    parser.add_argument("--conv-template", type=str, default="vicuna")
     args = parser.parse_args()
     logger.info(f"args: {args}")
 
     models = get_model_list(args.controller_url)
-    set_global_vars(args.controller_url, args.moderate, models)
+    set_global_vars(args.controller_url, args.moderate, models, args.conv_template)
 
     logger.info(args)
     demo = build_demo()

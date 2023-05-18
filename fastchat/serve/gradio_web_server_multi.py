@@ -129,7 +129,7 @@ def add_text(state0, state1, text, request: gr.Request):
 
     for i in range(num_models):
         if states[i] is None:
-            states[i] = get_default_conv_template("vicuna").copy()
+            states[i] = get_default_conv_template(conv_template).copy()
 
     if len(text) <= 0:
         for i in range(num_models):
@@ -433,11 +433,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--moderate", action="store_true", help="Enable content moderation"
     )
+    parser.add_argument("--conv-template", type=str, default="vicuna")
     args = parser.parse_args()
     logger.info(f"args: {args}")
 
     models = get_model_list(args.controller_url)
-    set_global_vars(args.controller_url, args.moderate, models)
+    conv_template = "vicuna"
+    set_global_vars(args.controller_url, args.moderate, models, args.conv_template)
 
     logger.info(args)
     demo = build_demo()

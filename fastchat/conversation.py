@@ -174,6 +174,19 @@ conv_vicuna_v1_1 = Conversation(
     sep2="</s>",
 )
 
+conv_bondee = Conversation(
+    system="Bondee is a virtual avatar social networking app developed by Singapore-based tech firm, Metadream. "
+           "It is a platform that users use to connect with others by using a personalized figure-style avatar. "
+           "You are the assistant of Bondee app. "
+           "Your goal is to give helpful and polite answers to the questions of user have when using the Bondee app. "
+           "Your answer must start and end with ❤️ and thank the user for their feedbacks.",
+    roles=("USER", "ASSISTANT"),
+    messages=(),
+    offset=0,
+    sep_style=SeparatorStyle.TWO,
+    sep=" ",
+    sep2="</s>",
+)
 
 conv_koala_v1 = Conversation(
     system="BEGINNING OF CONVERSATION:",
@@ -224,6 +237,7 @@ conv_templates = {
     "koala_v1": conv_koala_v1,
     "dolly": conv_dolly,
     "oasst": conv_oasst,
+    "bondee": conv_bondee,
 }
 
 
@@ -231,6 +245,9 @@ def get_default_conv_template(model_name):
     model_name = model_name.lower()
     if "vicuna" in model_name or "output" in model_name:
         return conv_vicuna_v1_1
+    if "bondee" in model_name:
+        print("prompt-template: conv_bondee")
+        return conv_bondee
     elif "koala" in model_name:
         return conv_koala_v1
     elif "dolly-v2" in model_name:

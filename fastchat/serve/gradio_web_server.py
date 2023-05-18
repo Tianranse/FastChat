@@ -580,12 +580,17 @@ if __name__ == "__main__":
     parser.add_argument("--conv-template", type=str, default="vicuna")
     args = parser.parse_args()
     logger.info(f"args: {args}")
-
+    starttime = time.time()
     models = get_model_list(args.controller_url)
+    print("get_model cost: {:.3}".format(time.time() - starttime))
+
     set_global_vars(args.controller_url, args.moderate, models, args.conv_template)
 
     logger.info(args)
+    starttime = time.time()
     demo = build_demo()
+    print("get_model cost: {:.3}".format(time.time() - starttime))
+
     demo.queue(
         concurrency_count=args.concurrency_count, status_update_rate=10, api_open=False
     ).launch(

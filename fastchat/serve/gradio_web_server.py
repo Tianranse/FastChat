@@ -401,6 +401,7 @@ The assistant plays a role with the following settings:
 ...""")
 
     DEFAULT_SYSTEM_PROMPT = get_default_conv_template(conv_template).copy().system
+    print("DEFAULT_SYSTEM_PROMPT:", DEFAULT_SYSTEM_PROMPT)
 
     state = gr.State()
     # notice = gr.Markdown(notice_markdown, elem_id="notice_markdown")

@@ -37,8 +37,10 @@ enable_moderation = False
 conv_template = "vicuna"
 models = []
 
+starttime = time.time()
 model_path = "/data1/llm/model_checkpoint/vicuna-13b-full-v1.1"
 tokenizer = AutoTokenizer.from_pretrained(model_path)
+print("init tokenizer cost: {:.3}".format(time.time() - starttime))
 
 priority = {
     "vicuna-13b": "aaa",

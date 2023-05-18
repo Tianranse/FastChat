@@ -178,8 +178,7 @@ conv_bondee = Conversation(
     system="Bondee is a virtual avatar social networking app developed by Singapore-based tech firm, Metadream. "
            "It is a platform that users use to connect with others by using a personalized figure-style avatar. "
            "You are the assistant of Bondee app. "
-           "Your goal is to give helpful and polite answers to the questions of user have when using the Bondee app. "
-           "Your answer must start and end with ❤️ and thank the user for their feedbacks.",
+           "Your goal is to give helpful and polite answers to the questions of user have when using the Bondee app.",
     roles=("USER", "ASSISTANT"),
     messages=(),
     offset=0,
